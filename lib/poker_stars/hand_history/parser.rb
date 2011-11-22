@@ -8,15 +8,15 @@ module PokerStars
       @state = nil
     end
 
-    def player_name(n)
-      n.gsub('.', '__').gsub(/^\$/, '__USD__')
+    def player_index(n)
+      @game[:seats].index(n)
     end
 
     def parse_preflop(line)
       # hole cards
       if line.start_with?('Dealt')
         line =~ /Dealt to (.*?) \[(.*)\]/
-        @game[:known_cards][player_name($1)] = $2
+        @game[:known_cards][player_index($1)] = $2
       end
       parse_street(line)
     end
@@ -89,7 +89,7 @@ module PokerStars
 
         line =~ /Seat (\d+): (.*?) \(\$?([\d.]+) in chips\)/
         @game[:seats][$1] = $2
-        @game[:stacks][player_name($2)] = $3.to_f
+        @game[:stacks][player_index($2)] = $3.to_f
         @game[:players] << $2
 
       elsif line.index(':')
@@ -114,11 +114,14 @@ module PokerStars
       if line.start_with?('Seat')
         line.gsub!(/\((small blind|big blind|button)\)\s+/, '')
         line =~ /^Seat \d+: (.*?) (showed|folded|mucked|collected)/
-        p = player_name($1)
-
+        p = player_index($1)
+        
         if line =~ /won \(\$?([\d.]+?)\)/
           @game[:winners][p] = $1.to_f
           @game[:won_at_showdown] << p
+          if line =~ /showed \[(.+?)\]/
+            @game[:known_cards][p] = $1
+          end
         elsif line =~ /collected \(\$?([\d.]+?)\)/
           @game[:winners][p] = $1.to_f
         elsif line =~ /lost|mucked/
@@ -141,7 +144,7 @@ module PokerStars
     def parse_street(line)
       if line.index(':')
         p, a = line.split(/:\s+/, 2)
-        p = player_name(p)
+        p = player_index(p)
         if a.start_with?('shows')
           a =~ /\[(.*)\]/
           @game[:known_cards][p] = $1
@@ -166,7 +169,7 @@ module PokerStars
           parse_game(line)
           @state = :headers
 
-        elsif line =~ /said/
+        elsif line =~ /said/ # chat message
         elsif line =~ /\*\*\* (.*) \*\*\*/
 
           case $1
@@ -195,12 +198,12 @@ module PokerStars
           case @state
           when :headers
             parse_headers(line)
-          when 'preflop'
-            parse_preflop(line)
           when :summary
             parse_summary(line)
           when :showdown
             parse_showdown(line)
+          when 'preflop'
+            parse_preflop(line)
           else
             parse_street(line)
           end

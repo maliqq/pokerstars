@@ -52,12 +52,12 @@ class PokerStars::HandHistory::Game
     }
   end
   
-  def went_to_showdown?(player)
-    @data[:went_to_showdown].include?(player)
+  def went_to_showdown?(p)
+    @data[:went_to_showdown].include?(p)
   end
 
-  def won_at_showdown?(player)
-    @data[:won_at_showdown].include?(player)
+  def won_at_showdown?(p)
+    @data[:won_at_showdown].include?(p)
   end
 
   def won?(p)
@@ -105,10 +105,7 @@ class PokerStars::HandHistory::Game
         end
       }
     end
-    return :total => [b, c],
-      :flop => [bb['flop'], cc['flop']],
-      :turn => [bb['turn'], cc['turn']],
-      :river => [bb['river'], cc['river']]
+    return :total => [b, c], :streets => [bb, cc]
   end
 
   def folded_to_steal # doesnt work

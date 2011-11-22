@@ -13,18 +13,6 @@ describe HandHistory do
   example 'vpip' do
     @h = HandHistory.new(File.join(File.dirname(__FILE__), '/fixtures'))
     puts
-    @h.calculate_stats('h2.txt', 'malikbakt')
-    @h.calculate_stats('h3.txt', 'malikbakt')
-    @h.calculate_stats('h4.txt', 'malikbakt')
-    puts
-    @h.calculate_stats('h3.txt', 'Stringi')
-    
-    if false
-      @h.calculate_stats('h5.txt', 'malikbakt')
-      @h.calculate_stats('h3.txt', 'kaisersax')
-      @h.calculate_stats('h3.txt', 'Stringi')
-      @h.calculate_stats('h6.txt', 'malikbakt')
-      @h.calculate_stats('h7.txt', 'malikbakt')
-    end
+    @h.calculate_stats('hh.txt', 'malik_msk')
   end
 end

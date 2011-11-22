@@ -20,6 +20,7 @@ module PokerStars
     def calculate_stats(file, player)
       f = File.join(@path, file)
       parser = Parser.new(File.open(f))
+      
       total = 0
       put = 0
       pfr = 0
@@ -45,12 +46,14 @@ module PokerStars
           seen_flop += 1 if game.seen_flop?(player)
           won += 1 if game.won?(player)
           cc += 1 if game.cold_call?(player)
-          game.aggression(player).each_pair { |k, v|
-            aggr[k].each_with_index { |i, n|
-              aggr[k][n] += v[n]
-            }
+          aggression = game.aggression(player)
+          aggression[:total].each_with_index { |n, i|
+            aggr[:total][i] += n
           }
-          total += 1
+          #aggression[:streets][0].each_pair { |street, i|
+          #  aggr[street][i] += n
+          #}
+          total += 1 
         end
       }
       require 'highline/import'
@@ -63,10 +66,10 @@ module PokerStars
         "H <%= color('" +("%i" % total) + "', :blue, BOLD) %>\t" +
         "W <%= color('" +("%.2f%%" % (won.to_f / total * 100)) + "', :blue) %>\t" +
         "WWSD <%= color('" +("%.2f%%" % ((won - wsd).to_f / total * 100)) + "', :blue) %>"
-      print "Af:"
-      aggr.each_pair { |street, nn|
-        print "\t#{street} - %.2f" % Rational(*nn).to_f unless street == :total
-      }
+      #print "Af:"
+      #aggr.each_pair { |street, nn|
+      #  print "\t#{street} - %.2f" % Rational(*nn).to_f unless street == :total
+      #}
       puts
     end
   end
