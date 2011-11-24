@@ -17,25 +17,25 @@ class PokerStars::HandHistory::Game
   end
 
   def in_play?(p)
-    preflop_action.has_key?(p)
+    preflop_action.has_key?(@data[:seats].index(p))
   end
 
   def raised?(p)
-    preflop_raisers.include?(p)
+    preflop_raisers.include?(@data[:seats].index(p))
   end
   
   def open_raiser?(p)
-    preflop_raisers.first == p
+    preflop_raisers.first == @data[:seats].index(p)
   end
 
   def last_raiser?(p)
-    preflop_raisers.last == p
+    preflop_raisers.last == @data[:seats].index(p)
   end
 
   def preflop_raisers
     @players.select { |p|
       next unless in_play?(p)
-      m = preflop_action[p][0]
+      m = preflop_action[@data[:seats].index(p)][0]
       m.is_a?(Hash) && (m.has_key?('raise') || m.has_key?('bet'))
     }
   end
@@ -43,7 +43,7 @@ class PokerStars::HandHistory::Game
   def voluntary_puts
     @players.select { |p|
       next unless in_play?(p)
-      m = preflop_action[p][0]
+      m = preflop_action[@data[:seats].index(p)][0]
       if p == @data[:bb] # except check on big blind
         m != 'check'
       else
@@ -57,11 +57,11 @@ class PokerStars::HandHistory::Game
   end
 
   def won_at_showdown?(p)
-    @data[:won_at_showdown].include?(p)
+    @data[:won_at_showdown].include?(@data[:seats].index(p))
   end
 
   def won?(p)
-    @data[:winners].has_key?(p)
+    @data[:winners].has_key?(@data[:seats].index(p))
   end
 
   def openraiser
@@ -77,7 +77,7 @@ class PokerStars::HandHistory::Game
   end
 
   def folded_preflop?(p)
-    preflop_action[p].last == 'fold'
+    preflop_action[@data[:seats].index(p)].last == 'fold'
   end
 
   def seen_flop?(p)
@@ -85,7 +85,7 @@ class PokerStars::HandHistory::Game
   end
 
   def cold_call?(p)
-    preflop_action[p].all? { |a| a.is_a?(Hash) && a.has_key?('call') }
+    preflop_action[@data[:seats].index(p)].all? { |a| a.is_a?(Hash) && a.has_key?('call') }
   end
 
   def aggression(player)
@@ -93,8 +93,8 @@ class PokerStars::HandHistory::Game
     bb = {'flop' => 0, 'turn' => 0, 'river' => 0, 'preflop' => 0}
     cc = {'flop' => 0, 'turn' => 0, 'river' => 0, 'preflop' => 0}
     @data[:bets].each_pair do |street, bets|
-      next unless bets[player]
-      bets[player].each { |bet|
+      next unless bets[@data[:seats].index(player)]
+      bets[@data[:seats].index(player)].each { |bet|
         if bet.is_a?(Hash) && (bet.has_key?('raise') || bet.has_key?('bet'))
           b += 1
           bb[street] += 1
