@@ -22,7 +22,9 @@ module PokerStars
       parser = Parser.new(File.open(f))
       parser.parse { |data|
         if hole = data[:known_cards][data[:seats].index(player)]
-          print hole.to_s + "\t"
+          if data[:winners][data[:seats].index(player)]
+            puts hole.to_s + "\t\t#{data[:winners][data[:seats].index(player)]}"
+          end
         end
       }
     end
