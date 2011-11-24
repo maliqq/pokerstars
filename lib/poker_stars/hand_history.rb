@@ -16,6 +16,16 @@ module PokerStars
         game = Game.new(data)
       }
     end
+    
+    def known_cards(file, player)
+      f = File.join(@path, file)
+      parser = Parser.new(File.open(f))
+      parser.parse { |data|
+        if hole = data[:known_cards][data[:seats].index(player)]
+          print hole.to_s + "\t"
+        end
+      }
+    end
 
     def calculate_stats(file, player)
       f = File.join(@path, file)
